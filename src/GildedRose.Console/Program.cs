@@ -36,77 +36,11 @@ namespace GildedRose.Console
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            var itemUpdateFactory = new ItemUpdaterFactory();
+            foreach(var item in Items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
-                }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
-
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
-
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
-                    {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
-                    }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
-                }
+                var itemUpdater = itemUpdateFactory.GetItemUpdater(item);
+                itemUpdater.UpdateInformation(item);
             }
         }
 
@@ -121,4 +55,117 @@ namespace GildedRose.Console
         public int Quality { get; set; }
     }
 
+    public interface IItemUpdater
+    {
+        void UpdateInformation(Item item);
+    }
+
+    public class ItemUpdaterFactory
+    {
+        public IItemUpdater GetItemUpdater(Item item)
+        {  
+            if (item.Name == "Aged Brie")
+                return new AgedBrieUpdater();
+
+            if (item.Name == "Sulfuras, Hand of Ragnaros")
+                return new SulfurasUpdater();
+            
+            if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
+                return new BackstagePassUpdater();
+
+            if (item.Name == "Conjured Mana Cake")
+                return new ConjuredItemUpdater();
+
+            return new BasicItemUpdater();
+        }
+    }
+
+    public class BasicItemUpdater : IItemUpdater
+    {
+        public void UpdateInformation(Item item)
+        {
+            item.SellIn--;
+
+            if (item.Quality <= 0)
+            {
+                item.Quality = 0;
+                return;
+            }
+
+            item.Quality--;
+
+            if (item.SellIn < 0 && item.Quality > 0)
+                item.Quality--;
+        }
+    }
+
+    public class AgedBrieUpdater : IItemUpdater
+    {
+        public void UpdateInformation(Item item)
+        {
+            item.SellIn--;
+
+            if (item.Quality < 50)
+                item.Quality++;
+            
+            if (item.SellIn < 0 && item.Quality < 50)
+                item.Quality++;
+            
+            if (item.Quality > 50)
+                item.Quality = 50;
+    
+        }
+    }
+    
+    public class SulfurasUpdater : IItemUpdater
+    {
+        public void UpdateInformation(Item item)
+        {
+            return;
+        }
+    }
+
+    public class BackstagePassUpdater : IItemUpdater
+    {
+        public void UpdateInformation(Item item)
+        {
+            item.SellIn--;
+
+            if (item.SellIn < 0)
+            {
+                item.Quality = 0;
+                return;
+            }
+
+            if (item.Quality >= 50)
+                return;
+
+            if (item.SellIn < 5)
+                item.Quality += 3;
+
+            else if (item.SellIn < 10)
+                item.Quality += 2;
+            else
+                item.Quality += 1;
+
+            if (item.Quality > 50)
+                item.Quality = 50;
+        }
+    }
+
+    public class ConjuredItemUpdater : IItemUpdater
+    {
+        public void UpdateInformation(Item item)
+        {
+            item.SellIn--;
+
+            int degrade = item.SellIn < 0 ? 4 : 2;
+
+            item.Quality -= degrade;
+
+            if (item.Quality < 0)
+                item.Quality = 0;
+            
+        }
+    }
 }
