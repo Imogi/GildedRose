@@ -8,7 +8,7 @@ namespace GildedRose.Tests
     public class GildedRoseTests
     {
         // Helper function to generate a Program with given items
-        private Program CreateProgramGivenItems(params Item[] items)
+        private static Program CreateProgramGivenItems(params Item[] items)
         {
             return new Program()
             {
@@ -16,7 +16,7 @@ namespace GildedRose.Tests
             };
         }
 
-        #region Basic Items
+        #region Basic Items Tests
 
         [Fact]
         public void BasicItem_DecreasesQualityAndSellInByOne()
@@ -38,6 +38,7 @@ namespace GildedRose.Tests
             var program = CreateProgramGivenItems(item);
             program.UpdateQuality();
 
+            Assert.Equal(-1, program.Items[0].SellIn);
             Assert.Equal(8, program.Items[0].Quality);
         }
 
@@ -66,6 +67,68 @@ namespace GildedRose.Tests
             Assert.Equal(-1, program.Items[0].SellIn);
 
             program.UpdateQuality();
+            Assert.Equal(-2, program.Items[0].SellIn);
+        }
+
+        #endregion
+
+        #region Aged Brie Tests
+
+        [Fact]
+        public void AgedBrie_IncreasesInQualityByOneWhenSellInDecreases()
+        {
+            var item = new Item { Name = "Aged Brie", SellIn = 10, Quality = 10 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(11, program.Items[0].Quality);
+            Assert.Equal(9, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(12, program.Items[0].Quality);
+            Assert.Equal(8, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void AgedBrie_IncreasesTwiceAfterSellInDate()
+        {
+            var item = new Item { Name = "Aged Brie", SellIn = 0, Quality = 10 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(12, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(14, program.Items[0].Quality);
+            Assert.Equal(-2, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void AgedBrie_QualityNeverExceedsFifty()
+        {
+            var item = new Item { Name = "Aged Brie", SellIn = 1, Quality = 50 };
+            
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(50, program.Items[0].Quality);
+            Assert.Equal(0, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void AgedBrie_QualityNeverExceedsFiftyEvenAfterSellInDate()
+        {
+            var item = new Item { Name = "Aged Brie", SellIn = 0, Quality = 47 };
+            
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(49, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(50, program.Items[0].Quality);
             Assert.Equal(-2, program.Items[0].SellIn);
         }
 
