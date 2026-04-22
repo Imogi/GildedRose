@@ -133,5 +133,31 @@ namespace GildedRose.Tests
         }
 
         #endregion
+    
+        #region Sulfuras Legenday item Tests
+        
+        [Fact]
+        public void Sulfuras_NeverChangesQualityOrSellIn()
+        {
+            var item = new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = 10, Quality = 80 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(80, program.Items[0].Quality);
+            Assert.Equal(10, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void Sulfuras_NeverChangesQualityEvenAfterSellIn()
+        {
+            var item = new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = -1, Quality = 80 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(80, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+        }
+
+        #endregion
     }
 }   
