@@ -234,5 +234,52 @@ namespace GildedRose.Tests
         }
 
         #endregion
+    
+        #region Conjured Items Tests
+        
+        [Fact]
+        public void ConjuredItem_QualityDegradesTwiceAsFast_AsBasicItem()
+        {
+            var item = new Item { Name = "Conjured Mana Cake", SellIn = 5, Quality = 10 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(8, program.Items[0].Quality);
+            Assert.Equal(4, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(6, program.Items[0].Quality);
+            Assert.Equal(3, program.Items[0].SellIn);
+        }
+
+        // As normal items quality degrade by -2 after SellIn, since Conjured
+        // items degrade twice as much then it has to be -4
+        [Fact]
+        public void ConjuredItem_QualityDegradesByFourAfterSellInDate()
+        {
+            var item = new Item { Name = "Conjured Mana Cake", SellIn = 0, Quality = 10 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(6, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void ConjuredItem_QualityNeverNegative()
+        {
+            var item = new Item { Name = "Conjured Mana Cake", SellIn = 0, Quality = 2 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(0, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(0, program.Items[0].Quality);
+            Assert.Equal(-2, program.Items[0].SellIn);
+        }
+
+        #endregion
     }
 }   
