@@ -72,7 +72,7 @@ namespace GildedRose.Tests
 
         #endregion
 
-        #region Aged Brie Tests
+        #region Aged Brie item Tests
 
         [Fact]
         public void AgedBrie_IncreasesInQualityByOneWhenSellInDecreases()
@@ -156,6 +156,81 @@ namespace GildedRose.Tests
             program.UpdateQuality();
             Assert.Equal(80, program.Items[0].Quality);
             Assert.Equal(-1, program.Items[0].SellIn);
+        }
+
+        #endregion
+    
+        #region Back stage passes item Tests
+        
+        [Fact]
+        public void BackstagePass_IncreasesByOne_WhenSellInGreaterThan10()
+        {
+            var item = new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 15, Quality = 20 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(21, program.Items[0].Quality);
+            Assert.Equal(14, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void BackstagePass_IncreasesByTwo_WhenSellIn10orLess()
+        {
+            var item = new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 10, Quality = 20 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(22, program.Items[0].Quality);
+            Assert.Equal(9, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(24, program.Items[0].Quality);
+            Assert.Equal(8, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void BackstagePass_IncreasesByThree_WhenSellIn5orLess()
+        {
+            var item = new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 5, Quality = 20 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(23, program.Items[0].Quality);
+            Assert.Equal(4, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(26, program.Items[0].Quality);
+            Assert.Equal(3, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void BackstagePass_DropsToZeroAfterConcert()
+        {
+            var item = new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 1, Quality = 20 }; 
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(23, program.Items[0].Quality);
+            Assert.Equal(0, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(0, program.Items[0].Quality);
+            Assert.Equal(-1, program.Items[0].SellIn);
+        }
+
+        [Fact]
+        public void BackstagePass_QualityNeverExceedsFifty()
+        {
+            var item = new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 5, Quality = 49 };
+            var program = CreateProgramGivenItems(item);
+
+            program.UpdateQuality();
+            Assert.Equal(50, program.Items[0].Quality);
+            Assert.Equal(4, program.Items[0].SellIn);
+
+            program.UpdateQuality();
+            Assert.Equal(50, program.Items[0].Quality);
+            Assert.Equal(3, program.Items[0].SellIn);
         }
 
         #endregion
